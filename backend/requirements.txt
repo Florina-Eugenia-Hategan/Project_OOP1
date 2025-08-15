@@ -3,10 +3,10 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
-django
-djangorestframework
-django-cors-headers
-whitenoise
-django-redis
-djangorestframework-simplejwt
-flake8
+Django==4.2
+Django-REST-Framework==3.14.0
+django-cors-headers==3.14.0
+whitenoise==6.4.0
+django-redis==5.3.0
+djangorestframework-simplejwt==5.2.2
+flake8==6.0.0
