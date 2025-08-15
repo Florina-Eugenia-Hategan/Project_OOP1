@@ -51,7 +51,7 @@ jobs:
       - name: Zip artifacts for development
         run: |
           cd backend
-          zip release.zip ./* -r
+          powershell Compress-Archive -Path * -DestinationPath release.zip
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
