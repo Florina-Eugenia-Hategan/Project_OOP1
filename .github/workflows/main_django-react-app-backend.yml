@@ -37,6 +37,18 @@ jobs:
             exit 1
           fi
 
+      - name: Check requirements file permissions and content
+        run: |
+          cd backend
+          if [ ! -r "requirements.txt" ]; then
+            echo "Error: requirements.txt is not readable!"
+            exit 1
+          fi
+          if [ ! -s "requirements.txt" ]; then
+            echo "Error: requirements.txt is empty!"
+            exit 1
+          fi
+
       - name: Install dependencies
         run: |
           cd backend
