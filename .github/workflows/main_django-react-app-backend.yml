@@ -35,7 +35,18 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        
+
+
+      - name: Run database migrations
+        run: |
+          cd backend
+          python manage.py migrate
+
+      - name: Collect static files
+        run: |
+          cd backend
+          python manage.py collectstatic --noinput
+
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       - name: Zip artifacts for development
         run: |
@@ -70,10 +81,20 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E84FDC7BDCAA47E7BBF6AA869329398A }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_74330B59BA3B466D8BAC0C1EB0ED73DE }}
 
+      - name: Verify artifact content
+        run: |
+          unzip -l backend/release.zip
+
+      - name: Debug environment variables
+        run: |
+          echo "Client ID: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6CCA14D1BC48470C8C72949BC6941A64 }}"
+          echo "Tenant ID: ${{ secrets.AZUREAPPSERVICE_TENANTID_E84FDC7BDCAA47E7BBF6AA869329398A }}"
+          echo "Subscription ID: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_74330B59BA3B466D8BAC0C1EB0ED73DE }}"
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'django-react-app-backend'
           slot-name: 'Production'
-          
+          package: backend/release.zip
