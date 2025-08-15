@@ -32,8 +32,12 @@ jobs:
       - name: Install dependencies
         run: |
           cd backend
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f "requirements.txt" ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "Error: requirements.txt not found!"
+            exit 1
 
       - name: Verify virtual environment activation
         run: |
