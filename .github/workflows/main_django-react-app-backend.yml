@@ -29,16 +29,20 @@ jobs:
           python -m venv venv
           source venv/bin/activate
       
+      - name: Check requirements file existence
+        run: |
+          cd backend
+          if [ ! -f "requirements.txt" ]; then
+            echo "Error: requirements.txt not found in backend directory!"
+            exit 1
+          fi
+
       - name: Install dependencies
         run: |
           cd backend
-          if [ -f "requirements.txt" ]; then
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-          else
-            echo "Error: requirements.txt not found!"
-            exit 1
-
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
       - name: Verify virtual environment activation
         run: |
           source venv/bin/activate
