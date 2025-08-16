@@ -92,7 +92,7 @@ These are the steps followed to migrate and configure the necessary services in 
 - Create a repository on GitHub.
 - Add the GitHub remote:
   ```bash
-  git remote add origin <URL-of-the-repository>
+  git remote add origin https://github.com/Florina-Eugenia-Hategan/Project_OOP1.git
   ```
 - Push the code:
   ```bash
@@ -188,34 +188,28 @@ These are the steps that will be followed immediately after migrating the fronte
   - The endpoint called.
   - The request parameters.
   - The request timestamp.
-
-## 3. Containerization
-- Create a Dockerfile for the microservice.
-- Define the Docker context for build and run.
-- Test the container locally.
-
-## 4. Monitoring and Logging
+## 3. Monitoring and Logging
 - Integrate Azure Monitor for logs and metrics.
 - Configure Log Analytics Workspace for centralized logging.
 - Implement a logging framework (e.g., Python `logging`).
 
-## 5. Caching
+## 4. Caching
 - Use Azure Cache for Redis for performance optimization.
 - Configure caching for API responses.
 
-## 6. Authorization
+## 5. Authorization
 - Integrate Azure Active Directory for authentication and authorization.
 - Configure API access using JWT tokens.
 
-## 7. Request Persistence in a Messaging/Streaming Framework
+## 6. Request Persistence in a Messaging/Streaming Framework
 - Use Azure Event Hubs or Azure Service Bus.
 - Implement logging of API requests in a messaging framework.
 
-## 8. Extensibility
+## 7. Extensibility
 - Design the microservice to allow easy addition of new mathematical functionalities.
 - Use a modular design.
 
-## 9. Implementing a Serverless Version (Bonus)
+## 8. Implementing a Serverless Version
 - Use Azure Functions for implementing mathematical functions.
 - Configure the functions to be triggered via HTTP.
 - Test the functionality in Azure Free Tier.

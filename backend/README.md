@@ -64,9 +64,8 @@ To install and set up the backend from GitHub, follow these steps:
 1. **Clone the repository**
    - Open your terminal and run the following command to clone the project:
      ```bash
-     git clone <repository-url>
+     git clone https://github.com/Florina-Eugenia-Hategan/Project_OOP1.git
      ```
-   - Replace `<repository-url>` with the URL of the GitHub repository.
 
 2. **Navigate to the backend directory**
    - Move into the `backend` folder:
