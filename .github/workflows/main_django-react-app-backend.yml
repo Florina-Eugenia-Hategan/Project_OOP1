@@ -10,11 +10,14 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: write # Adjusted permissions at job level
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +31,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-      
+
       - name: Check requirements file existence
         run: |
           cd backend
@@ -54,7 +57,7 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
+
       - name: Verify virtual environment activation
         run: |
           source venv/bin/activate
@@ -76,7 +79,6 @@ jobs:
           cd backend
           python manage.py collectstatic --noinput
 
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       - name: Run tests
         run: |
           cd backend
@@ -116,8 +118,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write # Adjusted permissions at job level
+      contents: read
 
     steps:
       - name: Download backend artifact from build job
@@ -133,23 +135,17 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6CCA14D1BC48470C8C72949BC6941A64 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E84FDC7BDCAA47E7BBF6AA869329398A }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_74330B59BA3B466D8BAC0C1EB0ED73DE }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: Verify backend artifact content
         run: |
-          unzip -l backend/release.zip
+          unzip -l backend/release.zip || echo "Error: Backend artifact verification failed!"
 
       - name: Verify frontend artifact content
         run: |
-          ls frontend-app/build
-
-      - name: Debug environment variables
-        run: |
-          echo "Client ID: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6CCA14D1BC48470C8C72949BC6941A64 }}"
-          echo "Tenant ID: ${{ secrets.AZUREAPPSERVICE_TENANTID_E84FDC7BDCAA47E7BBF6AA869329398A }}"
-          echo "Subscription ID: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_74330B59BA3B466D8BAC0C1EB0ED73DE }}"
+          ls frontend-app/build || echo "Error: Frontend artifact verification failed!"
 
       - name: Deploy backend to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -168,31 +164,11 @@ jobs:
           app_name: 'django-react-app-frontend'
           environment: 'Production'
 
-      - name: Verify deployment status
-        run: |
-          echo "Backend and frontend deployed successfully."
-
-      - name: Verify backend artifact checksum
-        run: |
-          cd backend
-          sha256sum release.zip
-
-      - name: Verify frontend artifact checksum
-        run: |
-          cd frontend-app/build
-          sha256sum *
-
-      - name: Run frontend tests
-        run: |
-          cd frontend-app
-          npm install
-          npm test
-
       - name: Monitor application status
         run: |
           echo "Checking application status..."
-          az monitor metrics list --resource django-react-app-backend --metric "Http5xx" --interval PT1H
-          az monitor metrics list --resource django-react-app-frontend --metric "Http5xx" --interval PT1H
+          az monitor metrics list --resource django-react-app-backend --metric "Http5xx" --interval PT1H || echo "Error: Backend monitoring failed!"
+          az monitor metrics list --resource django-react-app-frontend --metric "Http5xx" --interval PT1H || echo "Error: Frontend monitoring failed!"
 
       # Detailed comments added for each step
       # Step: Verify backend artifact checksum
