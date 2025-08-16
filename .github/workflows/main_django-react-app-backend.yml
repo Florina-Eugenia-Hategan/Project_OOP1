@@ -27,22 +27,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-
-      - name: Check requirements file existence
+      - name: Activate virtual environment and install dependencies
         run: |
           cd backend
+          python -m venv venv
+          source venv/bin/activate
           if [ ! -f "requirements.txt" ]; then
             echo "Error: requirements.txt not found in backend directory!"
             exit 1
           fi
-
-      - name: Check requirements file permissions and content
-        run: |
-          cd backend
           if [ ! -r "requirements.txt" ]; then
             echo "Error: requirements.txt is not readable!"
             exit 1
@@ -51,14 +44,10 @@ jobs:
             echo "Error: requirements.txt is empty!"
             exit 1
           fi
-
-      - name: Install dependencies
-        run: |
-          cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Verify virtual environment activation
+      - name: Verify installed packages
         run: |
           source venv/bin/activate
           python -m pip list
