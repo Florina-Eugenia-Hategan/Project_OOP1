@@ -27,48 +27,43 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Activate virtual environment and install dependencies
+      - name: Set up Python and install dependencies
+        working-directory: backend
         run: |
-          cd backend
           python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Verify installed packages
-        run: |
-          source venv/bin/activate
           python -m pip list
 
-      - name: Reinstall dependencies
+      - name: Run database migrations
+        working-directory: backend
         run: |
           source venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run database migrations
-        run: |
-          cd backend
           python manage.py migrate
 
       - name: Collect static files
+        working-directory: backend
         run: |
-          cd backend
+          source venv/bin/activate
           python manage.py collectstatic --noinput
 
       - name: Run tests
+        working-directory: backend
         run: |
-          cd backend
+          source venv/bin/activate
           python manage.py test
 
       - name: Lint code
+        working-directory: backend
         run: |
-          cd backend
+          source venv/bin/activate
           flake8 .
 
       - name: Zip artifacts for development
+        working-directory: backend
         run: |
-          cd backend
-          powershell Compress-Archive -Path * -DestinationPath release.zip
+          zip -r release.zip .
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
