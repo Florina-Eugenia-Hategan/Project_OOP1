@@ -245,7 +245,7 @@ function Login({ onAuth }) {
             />
           </div>
           {usernameWarning && (
-            <div style={{color:'#d32f2f', fontSize:13, marginBottom:4}}>{usernameWarning}</div>
+            <div style={{color:'#d32f2f', fontSize:13, margin:'16px 0', textAlign:'center'}}>{usernameWarning}</div>
           )}
           <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconMail}
@@ -263,7 +263,7 @@ function Login({ onAuth }) {
             />
           </div>
           {emailWarning && (
-            <div style={{color:'#d32f2f', fontSize:13, marginBottom:4}}>{emailWarning}</div>
+            <div style={{color:'#d32f2f', fontSize:13, margin:'16px 0', textAlign:'center'}}>{emailWarning}</div>
           )}
           <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconLock}
@@ -289,7 +289,7 @@ function Login({ onAuth }) {
             </button>
           </div>
           {passwordWarning && (
-            <div style={{color:'#d32f2f', fontSize:13, marginBottom:4}}>{passwordWarning}</div>
+            <div style={{color:'#d32f2f', fontSize:13, margin:'16px 0', textAlign:'center'}}>{passwordWarning}</div>
           )}
           <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>Create Account</button>
           {signupError && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{signupError}</div>}
