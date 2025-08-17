@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write # Adjusted permissions at job level
 
@@ -29,41 +29,47 @@ jobs:
 
       - name: Set up Python and install dependencies
         working-directory: backend
+        shell: pwsh
         run: |
           python -m venv venv
-          source venv/bin/activate
+          .\venv\Scripts\Activate.ps1
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m pip list
 
       - name: Run database migrations
         working-directory: backend
+        shell: pwsh
         run: |
-          source venv/bin/activate
+          .\venv\Scripts\Activate.ps1
           python manage.py migrate
 
       - name: Collect static files
         working-directory: backend
+        shell: pwsh
         run: |
-          source venv/bin/activate
+          .\venv\Scripts\Activate.ps1
           python manage.py collectstatic --noinput
 
       - name: Run tests
         working-directory: backend
+        shell: pwsh
         run: |
-          source venv/bin/activate
+          .\venv\Scripts\Activate.ps1
           python manage.py test
 
       - name: Lint code
         working-directory: backend
+        shell: pwsh
         run: |
-          source venv/bin/activate
+          .\venv\Scripts\Activate.ps1
           flake8 .
 
       - name: Zip artifacts for development
         working-directory: backend
+        shell: pwsh
         run: |
-          zip -r release.zip .
+          Compress-Archive -Path * -DestinationPath release.zip
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
@@ -86,7 +92,7 @@ jobs:
           path: frontend-app/build
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     permissions:
       id-token: write # Adjusted permissions at job level
@@ -111,12 +117,15 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: Verify backend artifact content
+        shell: pwsh
         run: |
-          unzip -l backend/release.zip || echo "Error: Backend artifact verification failed!"
+          Expand-Archive -Path backend/release.zip -DestinationPath backend/release_zip_content
+          Get-ChildItem backend/release_zip_content
 
       - name: Verify frontend artifact content
+        shell: pwsh
         run: |
-          ls frontend-app/build || echo "Error: Frontend artifact verification failed!"
+          Get-ChildItem frontend-app/build
 
       - name: Deploy backend to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -136,10 +145,11 @@ jobs:
           environment: 'Production'
 
       - name: Monitor application status
+        shell: pwsh
         run: |
-          echo "Checking application status..."
-          az monitor metrics list --resource django-react-app-backend --metric "Http5xx" --interval PT1H || echo "Error: Backend monitoring failed!"
-          az monitor metrics list --resource django-react-app-frontend --metric "Http5xx" --interval PT1H || echo "Error: Frontend monitoring failed!"
+          Write-Host "Checking application status..."
+          az monitor metrics list --resource django-react-app-backend --metric "Http5xx" --interval PT1H
+          az monitor metrics list --resource django-react-app-frontend --metric "Http5xx" --interval PT1H
 
       # Detailed comments added for each step
       # Step: Verify backend artifact checksum
