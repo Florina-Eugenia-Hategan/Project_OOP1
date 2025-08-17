@@ -32,7 +32,7 @@ jobs:
         shell: pwsh
         run: |
           python -m venv venv
-          .\venv\Scripts\Activate.ps1
+          venv\Scripts\activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m pip list
@@ -41,28 +41,28 @@ jobs:
         working-directory: backend
         shell: pwsh
         run: |
-          .\venv\Scripts\Activate.ps1
+          venv\Scripts\activate
           python manage.py migrate
 
       - name: Collect static files
         working-directory: backend
         shell: pwsh
         run: |
-          .\venv\Scripts\Activate.ps1
+          venv\Scripts\activate
           python manage.py collectstatic --noinput
 
       - name: Run tests
         working-directory: backend
         shell: pwsh
         run: |
-          .\venv\Scripts\Activate.ps1
+          venv\Scripts\activate
           python manage.py test
 
       - name: Lint code
         working-directory: backend
         shell: pwsh
         run: |
-          .\venv\Scripts\Activate.ps1
+          venv\Scripts\activate
           flake8 .
 
       - name: Zip artifacts for development
