@@ -116,16 +116,6 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: Verify backend artifact content
-        shell: pwsh
-        run: |
-          Expand-Archive -Path backend/release.zip -DestinationPath backend/release_zip_content
-          Get-ChildItem backend/release_zip_content
-
-      - name: Verify frontend artifact content
-        shell: pwsh
-        run: |
-          Get-ChildItem frontend-app/build
 
       - name: Deploy backend to Azure Web App
         uses: azure/webapps-deploy@v3
