@@ -58,6 +58,70 @@ This project is a fullstack web application featuring a Django REST Framework ba
    ```
 
 ## Docker Deployment
+
+## CI/CD: GitHub Actions Workflow
+This project uses GitHub Actions to automatically build and test the Django backend on every push to the `main` branch. The workflow runs on Windows and performs the following steps:
+
+```
+name: Build and test Python app - django-react-app-backend
+
+on:
+   push:
+      branches:
+         - main
+   workflow_dispatch:
+
+permissions:
+   contents: write
+
+jobs:
+   build:
+      runs-on: windows-latest
+      permissions:
+         contents: write
+      steps:
+         - uses: actions/checkout@v4
+         - name: Set up Python version
+            uses: actions/setup-python@v5
+            with:
+               python-version: '3.11'
+         - name: Set up Python and install dependencies
+            working-directory: backend
+            shell: pwsh
+            run: |
+               python -m venv venv
+               venv\Scripts\activate
+               python -m pip install --upgrade pip
+               pip install -r requirements.txt
+         - name: Run database migrations
+            working-directory: backend
+            shell: pwsh
+            run: |
+               venv\Scripts\activate
+               python manage.py migrate
+         - name: Collect static files
+            working-directory: backend
+            shell: pwsh
+            run: |
+               venv\Scripts\activate
+               python manage.py collectstatic --noinput
+         - name: Run backend tests
+            working-directory: backend
+            shell: pwsh
+            run: |
+               venv\Scripts\activate
+               python manage.py test
+```
+
+**Workflow steps:**
+- Checks out the code from GitHub
+- Sets up Python 3.11 on Windows
+- Creates a virtual environment and installs dependencies
+- Runs Django database migrations
+- Collects static files
+- Runs backend tests
+
+This ensures your backend is always tested and built automatically, helping you catch errors early and maintain code quality.
 Use the provided Dockerfiles in `backend/` and `frontend-app/` to run the application in containers. Example commands:
 
 ```powershell
