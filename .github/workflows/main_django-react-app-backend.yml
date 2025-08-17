@@ -27,6 +27,7 @@ jobs:
         working-directory: backend
         shell: pwsh
         run: |
+          cd backend
           python -m venv venv
           venv\Scripts\activate
           python -m pip install --upgrade pip
