@@ -1,13 +1,21 @@
-# DO NOT include azure-functions-worker in this file
-# The Python Worker is managed by Azure Functions platform
-# Manually managing azure-functions-worker may cause unexpected issues
 
-azure-functions
 Django==4.2
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
 django-cors-headers==3.14.0
 whitenoise==6.4.0
 django-redis==5.3.0
-djangorestframework-simplejwt==5.2.2
+django-prometheus
+redis==5.0.1
+python-kafka==2.0.2
+cachetools==5.3.2
+pytest==7.4.2
+pytest-django==4.5.2
 flake8==6.0.0
-djangorestframework==3.14.0
-django_prometheus
+requests==2.31.0
+python-dotenv==1.0.1
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+aiokafka==0.10.0
+loguru==0.7.2
+prometheus-client==0.17.1
