@@ -41,6 +41,7 @@ function Login({ onAuth }) {
   const [signupUsername, setSignupUsername] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   // Eliminăm rolul
   const [error, setError] = useState(null);
   const [signupError, setSignupError] = useState(null);
@@ -48,9 +49,22 @@ function Login({ onAuth }) {
   const [usernameValid, setUsernameValid] = useState(false);
   const [emailValid, setEmailValid] = useState(false);
   const [passwordValid, setPasswordValid] = useState(false);
+  const [usernameWarning, setUsernameWarning] = useState('');
+  const [emailWarning, setEmailWarning] = useState('');
+  const [passwordWarning, setPasswordWarning] = useState('');
 
-  const validateUsername = (username) => username.length >= 3;
-  const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+  const validateUsername = (username) => {
+    const isValid = username.length >= 3;
+    setUsernameWarning(isValid ? '' : 'Username must be at least 3 characters long.');
+    return isValid;
+  };
+
+  const validateEmail = (email) => {
+    const isValid = /^\S+@\S+\.\S+$/.test(email);
+    setEmailWarning(isValid ? '' : 'Please enter a valid email address.');
+    return isValid;
+  };
+
   const validatePassword = (password) => {
     const rules = [
       password.length >= 8,
@@ -59,7 +73,18 @@ function Login({ onAuth }) {
       /\d/.test(password),
       /[!@#$%^&*(),.?":{}|<>]/.test(password),
     ];
+    const unmetRules = [];
+    if (!rules[0]) unmetRules.push('At least 8 characters');
+    if (!rules[1]) unmetRules.push('One uppercase letter');
+    if (!rules[2]) unmetRules.push('One lowercase letter');
+    if (!rules[3]) unmetRules.push('One digit');
+    if (!rules[4]) unmetRules.push('One special character');
+    setPasswordWarning(unmetRules.length > 0 ? `Password must have: ${unmetRules.join(', ')}` : '');
     return rules.every(rule => rule);
+  };
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
   };
 
   const handleLogin = async (e) => {
@@ -219,15 +244,8 @@ function Login({ onAuth }) {
               autoComplete="off"
             />
           </div>
-          {signupUsername && (
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:13, fontWeight:'bold', marginBottom:2}}>Username requirements:</div>
-              <div style={{fontSize:13}}>
-                <span style={{color: usernameValid ? '#388e3c' : '#d32f2f'}}>
-                  {usernameValid ? '✔' : '✘'} At least 3 characters
-                </span>
-              </div>
-            </div>
+          {usernameWarning && (
+            <div style={{color:'#d32f2f', fontSize:13, marginBottom:4}}>{usernameWarning}</div>
           )}
           <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconMail}
@@ -244,20 +262,13 @@ function Login({ onAuth }) {
               autoComplete="off"
             />
           </div>
-          {signupEmail && (
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:13, fontWeight:'bold', marginBottom:2}}>Email requirements:</div>
-              <div style={{fontSize:13}}>
-                <span style={{color: emailValid ? '#388e3c' : '#d32f2f'}}>
-                  {emailValid ? '✔' : '✘'} Valid email format (e.g. user@example.com)
-                </span>
-              </div>
-            </div>
+          {emailWarning && (
+            <div style={{color:'#d32f2f', fontSize:13, marginBottom:4}}>{emailWarning}</div>
           )}
           <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconLock}
             <input
-              type="password"
+              type={passwordVisible ? "text" : "password"}
               placeholder="Password"
               value={signupPassword}
               onChange={e => {
@@ -268,28 +279,17 @@ function Login({ onAuth }) {
               aria-label="Password"
               autoComplete="off"
             />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              style={{background: 'none', border: 'none', cursor: 'pointer', marginLeft: 8}}
+              aria-label="Toggle password visibility"
+            >
+              {passwordVisible ? 'Hide' : 'Show'}
+            </button>
           </div>
-          {signupPassword && (
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:13, fontWeight:'bold', marginBottom:2}}>Password requirements:</div>
-              <div style={{fontSize:13}}>
-                <span style={{color: passwordValid ? '#388e3c' : '#d32f2f'}}>
-                  {passwordValid ? '✔' : '✘'} At least 8 characters
-                </span><br/>
-                <span style={{color: /[A-Z]/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
-                  {/[A-Z]/.test(signupPassword) ? '✔' : '✘'} One uppercase letter (A-Z)
-                </span><br/>
-                <span style={{color: /[a-z]/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
-                  {/[a-z]/.test(signupPassword) ? '✔' : '✘'} One lowercase letter (a-z)
-                </span><br/>
-                <span style={{color: /\d/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
-                  {/\d/.test(signupPassword) ? '✔' : '✘'} One digit (0-9)
-                </span><br/>
-                <span style={{color: /[!@#$%^&*(),.?":{}|<>]/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
-                  {/[!@#$%^&*(),.?":{}|<>]/.test(signupPassword) ? '✔' : '✘'} One special character (!@#$%^&*(),.?":{}|&lt;&gt;)
-                </span>
-              </div>
-            </div>
+          {passwordWarning && (
+            <div style={{color:'#d32f2f', fontSize:13, marginBottom:4}}>{passwordWarning}</div>
           )}
           <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>Create Account</button>
           {signupError && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{signupError}</div>}
