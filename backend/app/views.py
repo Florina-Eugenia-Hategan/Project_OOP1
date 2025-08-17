@@ -1,3 +1,15 @@
+from rest_framework.decorators import api_view
+# Suggest email(s) for a given username
+@api_view(['POST'])
+def suggest_email(request):
+	username = request.data.get('username')
+	if not username:
+		return Response({'error': 'Username is required.'}, status=status.HTTP_400_BAD_REQUEST)
+	users = User2FA.objects.filter(username=username)
+	emails = list(users.values_list('email', flat=True))
+	if emails:
+		return Response({'emails': emails}, status=status.HTTP_200_OK)
+	return Response({'error': 'No email found for this username.'}, status=status.HTTP_404_NOT_FOUND)
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django.core.cache import cache
@@ -33,7 +45,7 @@ class RecoverPasswordView(APIView):
 	def post(self, request):
 		email = request.data.get('email')
 		if not email:
-			return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({'error': 'Please enter your email address.'}, status=status.HTTP_400_BAD_REQUEST)
 		users = User2FA.objects.filter(email=email)
 		if users.exists():
 			for user in users:
@@ -42,30 +54,30 @@ class RecoverPasswordView(APIView):
 				reset_link = f"http://localhost:3000/reset-password/{token}/"
 				send_mail(
 					'Password Recovery',
-					f'Click the link to reset your password: {reset_link}',
+					f'To reset your password, please click the following link: {reset_link}\nIf you did not request a password reset, please ignore this email.',
 					settings.EMAIL_HOST_USER,
 					[email],
 					fail_silently=False,
 				)
 		# Generic message, regardless if the email exists or not
-		return Response({'message': 'If the email address exists, you will receive a reset link.'}, status=status.HTTP_200_OK)
+		return Response({'message': 'If an account with that email exists, a password reset link has been sent.'}, status=status.HTTP_200_OK)
 
 class ResetPasswordView(APIView):
 	def post(self, request, token):
 		new_password = request.data.get('password')
 		if not new_password:
-			return Response({'error': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({'error': 'Please enter a new password.'}, status=status.HTTP_400_BAD_REQUEST)
 		user_id = cache.get(f"reset_token_{token}")
 		if not user_id:
-			return Response({'error': 'Invalid or expired token.'}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({'error': 'This password reset link is invalid or has expired.'}, status=status.HTTP_400_BAD_REQUEST)
 		try:
 			user = User2FA.objects.get(id=user_id)
 			user.set_password(new_password)
 			user.save()
 			cache.delete(f"reset_token_{token}")
-			return Response({'message': 'Password reset successful.'}, status=status.HTTP_200_OK)
+			return Response({'message': 'Your password has been reset successfully. You can now log in with your new password.'}, status=status.HTTP_200_OK)
 		except User2FA.DoesNotExist:
-			return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+			return Response({'error': 'User account not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 class SignupView(APIView):
 	def post(self, request):

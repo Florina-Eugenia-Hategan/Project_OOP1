@@ -132,7 +132,7 @@ function Login({ onAuth }) {
           onClick={() => setActiveTab('signin')}
           tabIndex={0}
         >
-          LOGIN
+          Sign In
         </button>
         <button
           className={`tab-btn${activeTab==='signup' ? ' active' : ''}`}
@@ -140,7 +140,7 @@ function Login({ onAuth }) {
           onClick={() => setActiveTab('signup')}
           tabIndex={0}
         >
-          SIGN UP
+          Create Account
         </button>
       </div>
       {activeTab === 'signin' && (
@@ -154,7 +154,9 @@ function Login({ onAuth }) {
             {iconLock}
             <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Password" autoComplete="off" />
           </div>
-          <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>LOGIN</button>
+          <button type="submit" style={{width: '100%', background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)', color: '#fff', padding: '18px', border: 'none', borderRadius: '16px', fontWeight: 'bold', fontSize: '20px', cursor: 'pointer', letterSpacing: '1px', outline: 'none', boxShadow: '0 4px 16px rgba(25, 118, 210, 0.12)', transition: 'background 0.2s, box-shadow 0.2s', marginTop: '8px'}} onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #2196f3 0%, #1976d2 100%)'} onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)'} tabIndex={0}>
+              Sign In
+          </button>
           <div style={{marginTop: 12, textAlign: 'right'}}>
             <button type="button" style={{background: 'none', border: 'none', color: '#1976d2', fontWeight: 'bold', cursor: 'pointer', fontSize: 15, textDecoration: 'underline', padding: 0}} onClick={() => setShowRecover(true)}>Forgot Password?</button>
           </div>
@@ -194,7 +196,7 @@ function Login({ onAuth }) {
             {iconLock}
             <input type="password" placeholder="Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Password" autoComplete="off" />
           </div>
-          <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>REGISTER</button>
+          <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>Create Account</button>
           {signupError && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{signupError}</div>}
           {successMsg && <div className="msg success" style={{background:'#eaffea', color:'#388e3c', border:'1px solid #388e3c', borderRadius:8, padding:'10px 0', fontSize:15}}>{successMsg}</div>}
         </form>

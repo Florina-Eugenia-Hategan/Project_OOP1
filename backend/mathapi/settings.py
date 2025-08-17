@@ -44,6 +44,35 @@ INSTALLED_APPS = [
     'django_prometheus',
     'whitenoise.runserver_nostatic',
 ]
+# DJANGO-ALLAUTH & SOCIAL LOGIN CONFIG
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+SITE_ID = 1
+
+REST_USE_JWT = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': 'YOUR_GOOGLE_CLIENT_ID',
+            'secret': 'YOUR_GOOGLE_CLIENT_SECRET',
+            'key': ''
+        }
+    }
+}
 
 # User model custom pentru 2FA
 AUTH_USER_MODEL = 'app.User2FA'
@@ -153,11 +182,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# For Gmail, use:
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'yourname@gmail.com'  # Use your full Gmail address
+# EMAIL_HOST_PASSWORD = 'your_app_password'  # Use your Gmail app password (not your regular password)
+
+# For Yahoo, use:
+# EMAIL_HOST = 'smtp.mail.yahoo.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'yourname@yahoo.com'  # Use your full Yahoo address
+# EMAIL_HOST_PASSWORD = 'your_app_password'  # Use your Yahoo app password
+
+# Example (Gmail):
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email@gmail.com'  # <-- schimbă cu adresa ta
-EMAIL_HOST_PASSWORD = 'your_app_password'  # <-- schimbă cu parola de aplicație
+EMAIL_HOST_USER = 'yourname@gmail.com'  # Replace with your actual email address
+EMAIL_HOST_PASSWORD = 'your_app_password'  # Replace with your actual app password
 
 CACHES = {
     'default': {
