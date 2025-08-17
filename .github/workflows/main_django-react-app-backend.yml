@@ -35,7 +35,6 @@ jobs:
             .\venv\Scripts\Activate.ps1
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          python -m pip list
 
       - name: Run database migrations
         working-directory: backend
@@ -142,11 +141,6 @@ jobs:
           az monitor metrics list --resource django-react-app-frontend --metric "Http5xx" --interval PT1H
 
       # Detailed comments added for each step
-      # Step: Verify backend artifact checksum
-      # Purpose: Ensure the integrity of the backend artifact before deployment
-
-      # Step: Verify frontend artifact checksum
-      # Purpose: Ensure the integrity of the frontend artifact before deployment
 
       # Step: Run frontend tests
       # Purpose: Validate the functionality of the React application
