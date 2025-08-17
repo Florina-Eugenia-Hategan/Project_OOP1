@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import './AuthCard.css';
 
 function Login({ onAuth }) {
+  // UI state for requirements checklist visibility
+  const [showUsernameReq, setShowUsernameReq] = useState(false);
+  const [showEmailReq, setShowEmailReq] = useState(false);
+  const [showPasswordReq, setShowPasswordReq] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
   const [showRecover, setShowRecover] = useState(false);
   const [recoverEmail, setRecoverEmail] = useState('');
@@ -41,6 +45,22 @@ function Login({ onAuth }) {
   const [error, setError] = useState(null);
   const [signupError, setSignupError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [usernameValid, setUsernameValid] = useState(false);
+  const [emailValid, setEmailValid] = useState(false);
+  const [passwordValid, setPasswordValid] = useState(false);
+
+  const validateUsername = (username) => username.length >= 3;
+  const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+  const validatePassword = (password) => {
+    const rules = [
+      password.length >= 8,
+      /[A-Z]/.test(password),
+      /[a-z]/.test(password),
+      /\d/.test(password),
+      /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    ];
+    return rules.every(rule => rule);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -132,7 +152,7 @@ function Login({ onAuth }) {
           onClick={() => setActiveTab('signin')}
           tabIndex={0}
         >
-          Sign In
+          Login
         </button>
         <button
           className={`tab-btn${activeTab==='signup' ? ' active' : ''}`}
@@ -140,7 +160,7 @@ function Login({ onAuth }) {
           onClick={() => setActiveTab('signup')}
           tabIndex={0}
         >
-          Create Account
+          Sign Up
         </button>
       </div>
       {activeTab === 'signin' && (
@@ -184,18 +204,93 @@ function Login({ onAuth }) {
       )}
       {activeTab === 'signup' && (
         <form onSubmit={handleSignup} autoComplete="off">
-          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconUser}
-            <input type="text" placeholder="Username" value={signupUsername} onChange={e => setSignupUsername(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Username" autoComplete="off" />
+            <input
+              type="text"
+              placeholder="Username"
+              value={signupUsername}
+              onChange={e => {
+                setSignupUsername(e.target.value);
+                setUsernameValid(validateUsername(e.target.value));
+              }}
+              style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}}
+              aria-label="Username"
+              autoComplete="off"
+            />
           </div>
-          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+          {signupUsername && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:13, fontWeight:'bold', marginBottom:2}}>Username requirements:</div>
+              <div style={{fontSize:13}}>
+                <span style={{color: usernameValid ? '#388e3c' : '#d32f2f'}}>
+                  {usernameValid ? '✔' : '✘'} At least 3 characters
+                </span>
+              </div>
+            </div>
+          )}
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconMail}
-            <input type="email" placeholder="Email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Email" autoComplete="off" />
+            <input
+              type="email"
+              placeholder="Email"
+              value={signupEmail}
+              onChange={e => {
+                setSignupEmail(e.target.value);
+                setEmailValid(validateEmail(e.target.value));
+              }}
+              style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}}
+              aria-label="Email"
+              autoComplete="off"
+            />
           </div>
-          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+          {signupEmail && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:13, fontWeight:'bold', marginBottom:2}}>Email requirements:</div>
+              <div style={{fontSize:13}}>
+                <span style={{color: emailValid ? '#388e3c' : '#d32f2f'}}>
+                  {emailValid ? '✔' : '✘'} Valid email format (e.g. user@example.com)
+                </span>
+              </div>
+            </div>
+          )}
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 24, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconLock}
-            <input type="password" placeholder="Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Password" autoComplete="off" />
+            <input
+              type="password"
+              placeholder="Password"
+              value={signupPassword}
+              onChange={e => {
+                setSignupPassword(e.target.value);
+                setPasswordValid(validatePassword(e.target.value));
+              }}
+              style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}}
+              aria-label="Password"
+              autoComplete="off"
+            />
           </div>
+          {signupPassword && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:13, fontWeight:'bold', marginBottom:2}}>Password requirements:</div>
+              <div style={{fontSize:13}}>
+                <span style={{color: passwordValid ? '#388e3c' : '#d32f2f'}}>
+                  {passwordValid ? '✔' : '✘'} At least 8 characters
+                </span><br/>
+                <span style={{color: /[A-Z]/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
+                  {/[A-Z]/.test(signupPassword) ? '✔' : '✘'} One uppercase letter (A-Z)
+                </span><br/>
+                <span style={{color: /[a-z]/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
+                  {/[a-z]/.test(signupPassword) ? '✔' : '✘'} One lowercase letter (a-z)
+                </span><br/>
+                <span style={{color: /\d/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
+                  {/\d/.test(signupPassword) ? '✔' : '✘'} One digit (0-9)
+                </span><br/>
+                <span style={{color: /[!@#$%^&*(),.?":{}|<>]/.test(signupPassword) ? '#388e3c' : '#d32f2f'}}>
+                  {/[!@#$%^&*(),.?":{}|<>]/.test(signupPassword) ? '✔' : '✘'} One special character (!@#$%^&*(),.?":{}|&lt;&gt;)
+                </span>
+              </div>
+            </div>
+          )}
           <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>Create Account</button>
           {signupError && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{signupError}</div>}
           {successMsg && <div className="msg success" style={{background:'#eaffea', color:'#388e3c', border:'1px solid #388e3c', borderRadius:8, padding:'10px 0', fontSize:15}}>{successMsg}</div>}

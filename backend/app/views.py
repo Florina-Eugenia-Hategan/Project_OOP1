@@ -1,4 +1,7 @@
 from rest_framework.decorators import api_view
+
+from rest_framework.decorators import api_view
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 # Suggest email(s) for a given username
 @api_view(['POST'])
 def suggest_email(request):
@@ -26,6 +29,10 @@ import datetime
 from django.http import JsonResponse
 import pika
 
+# Define AuthRateThrottle before usage
+class AuthRateThrottle(AnonRateThrottle):
+	rate = '5/min'  # Allow 5 requests per minute per IP
+
 # Helper for sending logs to RabbitMQ
 def send_to_rabbitmq(message):
 	try:
@@ -41,7 +48,9 @@ def send_to_rabbitmq(message):
 		connection.close()
 	except Exception as e:
 		pass  # Optionally log locally if RabbitMQ is down
+
 class RecoverPasswordView(APIView):
+	throttle_classes = [AuthRateThrottle]
 	def post(self, request):
 		email = request.data.get('email')
 		if not email:
@@ -80,6 +89,7 @@ class ResetPasswordView(APIView):
 			return Response({'error': 'User account not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 class SignupView(APIView):
+	throttle_classes = [AuthRateThrottle]
 	def post(self, request):
 		serializer = User2FASerializer(data=request.data)
 		if serializer.is_valid():
@@ -89,6 +99,7 @@ class SignupView(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+	throttle_classes = [AuthRateThrottle]
 	def post(self, request):
 		username = request.data.get('username')
 		password = request.data.get('password')
@@ -100,16 +111,16 @@ class LoginView(APIView):
 		return Response({'error': 'Invalid credentials or inactive user'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class Verify2FAView(APIView):
-    def post(self, request):
-        user_id = request.data.get('user_id')
-        code = request.data.get('code')
-        user = User2FA.objects.filter(id=user_id).first()
-        if user and user.verify_code(code):
-            refresh = RefreshToken.for_user(user)
-            return Response({'access': str(refresh.access_token), 'refresh': str(refresh)}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid 2FA code'}, status=status.HTTP_401_UNAUTHORIZED)
+	def post(self, request):
+		user_id = request.data.get('user_id')
+		code = request.data.get('code')
+		user = User2FA.objects.filter(id=user_id).first()
+		if user and user.verify_code(code):
+			refresh = RefreshToken.for_user(user)
+			return Response({'access': str(refresh.access_token), 'refresh': str(refresh)}, status=status.HTTP_200_OK)
+		return Response({'error': 'Invalid 2FA code'}, status=status.HTTP_401_UNAUTHORIZED)
 
 def test_cache(request):
-    cache.set('test_key', 'test_value', timeout=30)  # Setăm o valoare în cache
-    value = cache.get('test_key')  # Recuperăm valoarea din cache
-    return JsonResponse({'cached_value': value})
+	cache.set('test_key', 'test_value', timeout=30)  # Setăm o valoare în cache
+	value = cache.get('test_key')  # Recuperăm valoarea din cache
+	return JsonResponse({'cached_value': value})
