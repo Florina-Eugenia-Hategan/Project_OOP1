@@ -1,0 +1,158 @@
+import React, { useState } from 'react';
+import './AuthCard.css';
+
+function Login({ onAuth }) {
+  const [activeTab, setActiveTab] = useState('signin');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [signupUsername, setSignupUsername] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  // Eliminăm rolul
+  const [error, setError] = useState(null);
+  const [signupError, setSignupError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+    if (!username) {
+      setError('Username is required');
+      return;
+    }
+    if (!password) {
+      setError('Password is required');
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:8000/auth/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      if (response.ok && data.access) {
+        setSuccessMsg('Login successful!');
+        setTimeout(() => {
+          if (onAuth) onAuth(data.access);
+        }, 500);
+      } else {
+        setError(data.error || 'Login failed');
+      }
+    } catch (err) {
+      setError('Server error');
+    }
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setSignupError(null);
+    setSuccessMsg(null);
+    if (!signupUsername) {
+      setSignupError('Username is required');
+      return;
+    }
+    if (!signupEmail || !signupEmail.includes('@')) {
+      setSignupError('Valid email is required');
+      return;
+    }
+    if (!signupPassword || signupPassword.length < 6) {
+      setSignupError('Password must be at least 6 characters');
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:8000/auth/signup/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: signupUsername, email: signupEmail, password: signupPassword })
+      });
+      const data = await response.json();
+      if (response.ok && data.message) {
+        setSuccessMsg(data.message);
+        setSignupUsername('');
+        setSignupEmail('');
+        setSignupPassword('');
+  // nu mai resetăm rolul
+        setTimeout(() => setActiveTab('signin'), 1200);
+      } else {
+        setSignupError(data.error || JSON.stringify(data));
+      }
+    } catch (err) {
+      setSignupError('Server error');
+    }
+  };
+
+  // SVG icons identice cu cele din poză
+  const iconUser = (
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight:8, color:'#bbb'}}><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#bbb"/></svg>
+  );
+  const iconLock = (
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight:8, color:'#bbb'}}><path d="M6 10V8a6 6 0 1 1 12 0v2" stroke="#bbb" strokeWidth="2"/><rect x="6" y="10" width="12" height="8" rx="2" stroke="#bbb" strokeWidth="2"/></svg>
+  );
+  const iconMail = (
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight:8, color:'#bbb'}}><rect x="3" y="5" width="18" height="14" rx="2" stroke="#bbb" strokeWidth="2"/><path d="M3 7l9 6 9-6" stroke="#bbb" strokeWidth="2"/></svg>
+  );
+  const iconRole = (
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight:8, color:'#bbb'}}><circle cx="12" cy="12" r="10" stroke="#bbb" strokeWidth="2"/><path d="M12 8v4l3 3" stroke="#bbb" strokeWidth="2"/></svg>
+  );
+
+  return (
+  <div className="auth-card login-card" style={{maxWidth: 420, margin: '120px auto 0 auto', background: '#fff', borderRadius: 20, boxShadow: '0 8px 32px rgba(25, 118, 210, 0.15)', padding: '40px 32px 32px 32px', fontFamily: 'Segoe UI, Arial, sans-serif'}}>
+      <div style={{display: 'flex', borderBottom: '2px solid #f0f0f0', marginBottom: 24}}>
+        <button
+          className={`tab-btn${activeTab==='signin' ? ' active' : ''}`}
+          style={{flex: 1, padding: 12, fontWeight: 'bold', background: 'none', border: 'none', borderBottom: activeTab==='signin' ? '2px solid #1976d2' : '2px solid #f0f0f0', color: activeTab==='signin' ? '#222' : '#bbb', cursor: 'pointer', fontSize: 18, letterSpacing: 1}}
+          onClick={() => setActiveTab('signin')}
+          tabIndex={0}
+        >
+          LOGIN
+        </button>
+        <button
+          className={`tab-btn${activeTab==='signup' ? ' active' : ''}`}
+          style={{flex: 1, padding: 12, fontWeight: 'bold', background: 'none', border: 'none', borderBottom: activeTab==='signup' ? '2px solid #1976d2' : '2px solid #f0f0f0', color: activeTab==='signup' ? '#222' : '#bbb', cursor: 'pointer', fontSize: 18, letterSpacing: 1}}
+          onClick={() => setActiveTab('signup')}
+          tabIndex={0}
+        >
+          SIGN UP
+        </button>
+      </div>
+      {activeTab === 'signin' && (
+        <form onSubmit={handleLogin} autoComplete="off">
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+            {iconUser}
+            <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Username" autoComplete="off" />
+          </div>
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+            {iconLock}
+            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Password" autoComplete="off" />
+          </div>
+          <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>LOGIN</button>
+          {error && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{error}</div>}
+          {successMsg && <div className="msg success" style={{background:'#eaffea', color:'#388e3c', border:'1px solid #388e3c', borderRadius:8, padding:'10px 0', fontSize:15}}>{successMsg}</div>}
+        </form>
+      )}
+      {activeTab === 'signup' && (
+        <form onSubmit={handleSignup} autoComplete="off">
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+            {iconUser}
+            <input type="text" placeholder="Username" value={signupUsername} onChange={e => setSignupUsername(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Username" autoComplete="off" />
+          </div>
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+            {iconMail}
+            <input type="email" placeholder="Email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Email" autoComplete="off" />
+          </div>
+          <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
+            {iconLock}
+            <input type="password" placeholder="Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Password" autoComplete="off" />
+          </div>
+          <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>REGISTER</button>
+          {signupError && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{signupError}</div>}
+          {successMsg && <div className="msg success" style={{background:'#eaffea', color:'#388e3c', border:'1px solid #388e3c', borderRadius:8, padding:'10px 0', fontSize:15}}>{successMsg}</div>}
+        </form>
+      )}
+    </div>
+  );
+}
+
+export default Login;

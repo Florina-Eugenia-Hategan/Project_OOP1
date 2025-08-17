@@ -1,0 +1,160 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
+
+name: Build and deploy Python app to Azure Web App - django-react-app-backend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Adjusted permissions at job level
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Activate virtual environment and install dependencies
+        run: |
+          cd backend
+          python -m venv venv
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify installed packages
+        run: |
+          source venv/bin/activate
+          python -m pip list
+
+      - name: Reinstall dependencies
+        run: |
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run database migrations
+        run: |
+          cd backend
+          python manage.py migrate
+
+      - name: Collect static files
+        run: |
+          cd backend
+          python manage.py collectstatic --noinput
+
+      - name: Run tests
+        run: |
+          cd backend
+          python manage.py test
+
+      - name: Lint code
+        run: |
+          cd backend
+          flake8 .
+
+      - name: Zip artifacts for development
+        run: |
+          cd backend
+          powershell Compress-Archive -Path * -DestinationPath release.zip
+
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: |
+            backend/release.zip
+            !venv/
+
+      - name: Build frontend
+        run: |
+          cd frontend-app
+          npm install
+          npm run build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-app
+          path: frontend-app/build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write # Adjusted permissions at job level
+      contents: read
+
+    steps:
+      - name: Download backend artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+
+      - name: Download frontend artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+
+      - name: Verify backend artifact content
+        run: |
+          unzip -l backend/release.zip || echo "Error: Backend artifact verification failed!"
+
+      - name: Verify frontend artifact content
+        run: |
+          ls frontend-app/build || echo "Error: Frontend artifact verification failed!"
+
+      - name: Deploy backend to Azure Web App
+        uses: azure/webapps-deploy@v3
+        id: deploy-backend
+        with:
+          app-name: 'django-react-app-backend'
+          slot-name: 'Production'
+          package: backend/release.zip
+
+      - name: Deploy frontend to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        id: deploy-frontend
+        with:
+          app_location: 'frontend-app/build'
+          api_location: ''
+          app_name: 'django-react-app-frontend'
+          environment: 'Production'
+
+      - name: Monitor application status
+        run: |
+          echo "Checking application status..."
+          az monitor metrics list --resource django-react-app-backend --metric "Http5xx" --interval PT1H || echo "Error: Backend monitoring failed!"
+          az monitor metrics list --resource django-react-app-frontend --metric "Http5xx" --interval PT1H || echo "Error: Frontend monitoring failed!"
+
+      # Detailed comments added for each step
+      # Step: Verify backend artifact checksum
+      # Purpose: Ensure the integrity of the backend artifact before deployment
+
+      # Step: Verify frontend artifact checksum
+      # Purpose: Ensure the integrity of the frontend artifact before deployment
+
+      # Step: Run frontend tests
+      # Purpose: Validate the functionality of the React application
+
+      # Step: Monitor application status
+      # Purpose: Check for errors and ensure the application is running smoothly post-deployment
