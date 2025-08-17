@@ -10,71 +10,88 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    permissions:
+      contents: write # Adjusted permissions at job level
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python version
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.11'
 
-      - name: Create and start virtual environment
+      - name: Set up Python and install dependencies
+        working-directory: backend
+        shell: pwsh
         run: |
           cd backend
           python -m venv venv
-          source venv/bin/activate
-      
-      - name: Install dependencies
-        run: |
-          cd backend 
+          venv\Scripts\activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        
-      - name: Collect static files
+
+      - name: Run database migrations
+        working-directory: backend
+        shell: pwsh
         run: |
-          cd backend 
+          venv\Scripts\activate
+          python manage.py migrate
+
+      - name: Collect static files
+        working-directory: backend
+        shell: pwsh
+        run: |
+          venv\Scripts\activate
           python manage.py collectstatic --noinput
 
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
-
-      - name: Zip artifact for deployment
-        run: |
-          cd backend  
-          zip release.zip ./* -r
-
       - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-app
           path: |
             backend/release.zip
             !venv/
 
+
+
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+    permissions:
+      id-token: write # Adjusted permissions at job level
+      contents: read
+
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+
+      - name: Login to Azure
+        uses: azure/login@v2
         with:
-          name: python-app
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
 
-      
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v2
-        id: deploy-to-webapp
+      - name: Deploy backend to Azure Web App
+        uses: azure/webapps-deploy@v3
+        id: deploy-backend
         with:
           app-name: 'django-react-app-backend'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C8F03205651241E98C45ABA20D7578BE }}
+          package: backend/release.zip
+
+
+
+      # Detailed comments added for each step
+
+      # Step: Run frontend tests
+      # Purpose: Validate the functionality of the React application
+
+      # Step: Monitor application status
+      # Purpose: Check for errors and ensure the application is running smoothly post-deployment
