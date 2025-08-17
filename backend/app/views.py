@@ -12,7 +12,23 @@ from django.conf import settings
 import random
 import datetime
 from django.http import JsonResponse
+import pika
 
+# Helper for sending logs to RabbitMQ
+def send_to_rabbitmq(message):
+	try:
+		connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+		channel = connection.channel()
+		channel.queue_declare(queue='app_logs', durable=True)
+		channel.basic_publish(
+			exchange='',
+			routing_key='app_logs',
+			body=message,
+			properties=pika.BasicProperties(delivery_mode=2)
+		)
+		connection.close()
+	except Exception as e:
+		pass  # Optionally log locally if RabbitMQ is down
 class RecoverPasswordView(APIView):
 	def post(self, request):
 		email = request.data.get('email')
@@ -22,7 +38,7 @@ class RecoverPasswordView(APIView):
 		if users.exists():
 			for user in users:
 				token = get_random_string(32)
-				cache.set(f"reset_token_{token}", user.id, timeout=3600)  # valabil 1 oră
+				cache.set(f"reset_token_{token}", user.id, timeout=3600)  # valid for 1 hour
 				reset_link = f"http://localhost:3000/reset-password/{token}/"
 				send_mail(
 					'Password Recovery',
@@ -31,8 +47,8 @@ class RecoverPasswordView(APIView):
 					[email],
 					fail_silently=False,
 				)
-		# Mesaj generic, indiferent dacă emailul există sau nu
-		return Response({'message': 'Dacă adresa de email există, vei primi un link de resetare.'}, status=status.HTTP_200_OK)
+		# Generic message, regardless if the email exists or not
+		return Response({'message': 'If the email address exists, you will receive a reset link.'}, status=status.HTTP_200_OK)
 
 class ResetPasswordView(APIView):
 	def post(self, request, token):
@@ -56,7 +72,8 @@ class SignupView(APIView):
 		serializer = User2FASerializer(data=request.data)
 		if serializer.is_valid():
 			user = serializer.save()
-			return Response({'message': f'Cont creat cu succes pentru {user.username}!'}, status=status.HTTP_201_CREATED)
+			send_to_rabbitmq(f"Signup: username={user.username}, email={user.email}")
+			return Response({'message': f'Account created successfully for {user.username}!'}, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -65,9 +82,10 @@ class LoginView(APIView):
 		password = request.data.get('password')
 		user = authenticate(username=username, password=password)
 		if user:
+			send_to_rabbitmq(f"Login: username={username}")
 			refresh = RefreshToken.for_user(user)
 			return Response({'access': str(refresh.access_token), 'refresh': str(refresh)}, status=status.HTTP_200_OK)
-		return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+		return Response({'error': 'Invalid credentials or inactive user'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class Verify2FAView(APIView):
     def post(self, request):

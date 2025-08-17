@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    command: gunicorn mathapi.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - DJANGO_SETTINGS_MODULE=mathapi.settings
+  frontend:
+    build: ./frontend-app
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"

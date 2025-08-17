@@ -3,6 +3,35 @@ import './AuthCard.css';
 
 function Login({ onAuth }) {
   const [activeTab, setActiveTab] = useState('signin');
+  const [showRecover, setShowRecover] = useState(false);
+  const [recoverEmail, setRecoverEmail] = useState('');
+  const [recoverMsg, setRecoverMsg] = useState(null);
+  const [recoverError, setRecoverError] = useState(null);
+  const handleRecover = async (e) => {
+    e.preventDefault();
+    setRecoverMsg(null);
+    setRecoverError(null);
+    if (!recoverEmail || !recoverEmail.includes('@')) {
+      setRecoverError('Valid email is required');
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:8000/auth/recover-password/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: recoverEmail })
+      });
+      const data = await response.json();
+      if (response.ok && data.message) {
+        setRecoverMsg(data.message);
+        setRecoverEmail('');
+      } else {
+        setRecoverError(data.error || JSON.stringify(data));
+      }
+    } catch (err) {
+      setRecoverError('Server error');
+    }
+  };
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [signupUsername, setSignupUsername] = useState('');
@@ -115,6 +144,7 @@ function Login({ onAuth }) {
         </button>
       </div>
       {activeTab === 'signin' && (
+        <>
         <form onSubmit={handleLogin} autoComplete="off">
           <div style={{display: 'flex', alignItems: 'center', marginBottom: 16, background: '#f7f7f7', borderRadius: 8, padding: '16px 16px'}}>
             {iconUser}
@@ -125,9 +155,30 @@ function Login({ onAuth }) {
             <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={{flex: 1, border: 'none', background: 'transparent', fontSize: 17, color: '#222', fontWeight:500}} aria-label="Password" autoComplete="off" />
           </div>
           <button type="submit" style={{width: '100%', background: '#1976d2', color: '#fff', padding: 16, border: 'none', borderRadius: 12, fontWeight: 'bold', fontSize: 18, cursor: 'pointer', letterSpacing: 1, outline:'none'}} tabIndex={0}>LOGIN</button>
+          <div style={{marginTop: 12, textAlign: 'right'}}>
+            <button type="button" style={{background: 'none', border: 'none', color: '#1976d2', fontWeight: 'bold', cursor: 'pointer', fontSize: 15, textDecoration: 'underline', padding: 0}} onClick={() => setShowRecover(true)}>Forgot Password?</button>
+          </div>
           {error && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15}}>{error}</div>}
           {successMsg && <div className="msg success" style={{background:'#eaffea', color:'#388e3c', border:'1px solid #388e3c', borderRadius:8, padding:'10px 0', fontSize:15}}>{successMsg}</div>}
         </form>
+        {showRecover && (
+          <div style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.18)', zIndex:99, display:'flex', alignItems:'center', justifyContent:'center'}}>
+            <div style={{background:'#fff', borderRadius:16, boxShadow:'0 8px 32px rgba(25, 118, 210, 0.15)', padding:'32px 24px', minWidth:320, maxWidth:360, position:'relative'}}>
+              <button onClick={()=>{setShowRecover(false); setRecoverMsg(null); setRecoverError(null);}} style={{position:'absolute', top:12, right:12, background:'none', border:'none', fontSize:22, color:'#1976d2', cursor:'pointer'}} aria-label="Close">×</button>
+              <h3 style={{marginBottom:16, color:'#1976d2', fontWeight:700, fontSize:22}}>Recover Password</h3>
+              <form onSubmit={handleRecover} autoComplete="off">
+                <div style={{display:'flex', alignItems:'center', marginBottom:16, background:'#f7f7f7', borderRadius:8, padding:'12px 12px'}}>
+                  {iconMail}
+                  <input type="email" placeholder="Enter your email" value={recoverEmail} onChange={e => setRecoverEmail(e.target.value)} style={{flex:1, border:'none', background:'transparent', fontSize:16, color:'#222', fontWeight:500}} aria-label="Email" autoComplete="off" />
+                </div>
+                <button type="submit" style={{width:'100%', background:'#1976d2', color:'#fff', padding:12, border:'none', borderRadius:10, fontWeight:'bold', fontSize:16, cursor:'pointer', letterSpacing:1, outline:'none'}}>Send Recovery Email</button>
+                {recoverError && <div className="msg error" style={{background:'#ffeaea', color:'#d32f2f', border:'1px solid #d32f2f', borderRadius:8, padding:'10px 0', fontSize:15, marginTop:10}}>{recoverError}</div>}
+                {recoverMsg && <div className="msg success" style={{background:'#eaffea', color:'#388e3c', border:'1px solid #388e3c', borderRadius:8, padding:'10px 0', fontSize:15, marginTop:10}}>{recoverMsg}</div>}
+              </form>
+            </div>
+          </div>
+        )}
+        </>
       )}
       {activeTab === 'signup' && (
         <form onSubmit={handleSignup} autoComplete="off">
