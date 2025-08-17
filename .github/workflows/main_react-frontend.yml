@@ -31,7 +31,7 @@ jobs:
         run: |
           npm run build
 
-      - name: Build completed successfully
+      - name: Run ESLint code quality check
         working-directory: frontend-app
         run: |
-          echo "Build completed successfully!"
+          npm run lint
