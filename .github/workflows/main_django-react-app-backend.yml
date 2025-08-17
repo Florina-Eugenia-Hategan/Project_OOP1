@@ -1,8 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
-
-name: Build and deploy Python app to Azure Web App - django-react-app-backend
+name: Build and test Python app - django-react-app-backend
 
 on:
   push:
@@ -17,7 +13,7 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: write # Adjusted permissions at job level
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -50,47 +46,17 @@ jobs:
           venv\Scripts\activate
           python manage.py collectstatic --noinput
 
-      - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: |
-            backend/release.zip
-            !venv/
+      - name: Run backend tests
+        working-directory: backend
+        shell: pwsh
+        run: |
+          venv\Scripts\activate
+          python manage.py test
 
-
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    permissions:
-      id-token: write # Adjusted permissions at job level
-      contents: read
-
-    steps:
-
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
-
-
-      - name: Deploy backend to Azure Web App
-        uses: azure/webapps-deploy@v3
-        id: deploy-backend
-        with:
-          app-name: 'django-react-app-backend'
-          slot-name: 'Production'
-          package: backend/release.zip
-
-
-
-      # Detailed comments added for each step
-
-      # Step: Run frontend tests
-      # Purpose: Validate the functionality of the React application
-
-      # Step: Monitor application status
-      # Purpose: Check for errors and ensure the application is running smoothly post-deployment
+      # Step: Upload artifact (optional, only if you need to use it in other jobs)
+      # uses: actions/upload-artifact@v4
+      # with:
+      #   name: python-app
+      #   path: |
+      #     backend/release.zip
+      #     !venv/
