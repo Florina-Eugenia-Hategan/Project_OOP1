@@ -1,4 +1,4 @@
-name: Build and test Python app - django-react-app-backend
+name: Build and test Django backend
 
 on:
   push:
@@ -12,18 +12,16 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: write
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Python version
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Set up Python and install dependencies
+      - name: Install dependencies
         working-directory: backend
         shell: pwsh
         run: |
@@ -32,7 +30,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run database migrations
+      - name: Run migrations
         working-directory: backend
         shell: pwsh
         run: |
@@ -46,7 +44,7 @@ jobs:
           venv\Scripts\activate
           python manage.py collectstatic --noinput
 
-      - name: Run backend tests
+      - name: Run tests
         working-directory: backend
         shell: pwsh
         run: |
