@@ -93,9 +93,6 @@ function Login({ onAuth }) {
   const iconMail = (
     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight:8, color:'#bbb'}}><rect x="3" y="5" width="18" height="14" rx="2" stroke="#bbb" strokeWidth="2"/><path d="M3 7l9 6 9-6" stroke="#bbb" strokeWidth="2"/></svg>
   );
-  const iconRole = (
-    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{marginRight:8, color:'#bbb'}}><circle cx="12" cy="12" r="10" stroke="#bbb" strokeWidth="2"/><path d="M12 8v4l3 3" stroke="#bbb" strokeWidth="2"/></svg>
-  );
 
   return (
   <div className="auth-card login-card" style={{maxWidth: 420, margin: '120px auto 0 auto', background: '#fff', borderRadius: 20, boxShadow: '0 8px 32px rgba(25, 118, 210, 0.15)', padding: '40px 32px 32px 32px', fontFamily: 'Segoe UI, Arial, sans-serif'}}>
