@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/health/', HealthView.as_view(), name='health'),
     path('', lambda request: HttpResponse("<h2>Backend Django REST API - vezi /api/ pentru endpointuri</h2>", content_type="text/html")),
     path('metrics/', exports.ExportToDjangoView, name='metrics'),
+    path('auth/', include('allauth.urls')),
 ]

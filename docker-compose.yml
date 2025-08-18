@@ -3,7 +3,7 @@ services:
   backend:
     build: ./backend
     container_name: backend
-    command: gunicorn mathapi.wsgi:application --bind 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
@@ -16,6 +16,7 @@ services:
   frontend:
     build: ./frontend-app
     container_name: frontend
+    command: npm start
     ports:
       - "3000:3000"
     depends_on:

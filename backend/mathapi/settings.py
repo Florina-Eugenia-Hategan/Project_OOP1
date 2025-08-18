@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_prometheus',
     'whitenoise.runserver_nostatic',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 ]
 # DJANGO-ALLAUTH & SOCIAL LOGIN CONFIG
 AUTHENTICATION_BACKENDS = (
@@ -88,6 +91,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 # Introducem WhiteNoise în middleware
@@ -97,6 +101,7 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Frontend local development
+    "http://127.0.0.1:3000",  # Alternative local development
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -217,10 +222,16 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'yourname@gmail.com'  # Replace with your actual email address
 EMAIL_HOST_PASSWORD = 'your_app_password'  # Replace with your actual app password
 
+# Updated settings for backend communication
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Frontend local development
+    "http://127.0.0.1:3000",  # Alternative local development
+]
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': 'redis://redis:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
