@@ -1,4 +1,3 @@
-
 # Django REST + React Fullstack Application
 
 ## Overview
@@ -58,6 +57,24 @@ This project is a fullstack web application featuring a Django REST Framework ba
    ```
 
 ## Docker Deployment
+
+### Running with Docker
+This project supports Docker for containerized deployment. To run the application using Docker:
+
+1. Build the Docker images:
+   ```powershell
+   docker-compose build
+   ```
+2. Start the containers:
+   ```powershell
+   docker-compose up
+   ```
+
+### Accessing the Application
+- **Backend**: Accessible at `http://localhost:8000`
+- **Frontend**: Accessible at `http://localhost:3000`
+
+Ensure Docker is installed and running on your system before executing these commands.
 
 ## CI/CD: GitHub Actions Workflow
 This project uses GitHub Actions to automatically build and test the Django backend on every push to the `main` branch. The workflow runs on Windows and performs the following steps:
